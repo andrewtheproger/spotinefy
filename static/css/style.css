@@ -1,0 +1,33 @@
+.form-search {
+  display: flex;
+  justify-content: space-around;
+}
+.ml-auto {
+  margin-left: auto;
+}
+a {
+  font-size: x-small;
+}
+.right-aligned-header {
+  display: flex;
+  justify-content: space-around;
+}
+.right-aligned-header-item {
+  margin-right: 1em;
+  margin-left: 1em;
+}
+.form-search-item {
+  margin-right: 0.1em;
+  margin-left: 0.1em;
+}
+.brand {
+  margin-left: 1em;
+}
+.b-form-group {
+  margin: 1em;
+}
+header {
+  position: sticky;
+  width: 100%;
+  top: 0;
+} 

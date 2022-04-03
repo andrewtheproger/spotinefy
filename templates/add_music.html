@@ -1,0 +1,61 @@
+{% extends "base.html" %} {% block content %}
+<div>
+  <b-form @submit="onSubmit_song" @reset="onReset">
+    <div class="b-form-group"><b-form-group
+      id="input-group-1"
+      label="Название:"
+      label-for="input-1"
+    >
+      <b-form-input
+        id="input-1"
+        v-model="form_song.name"
+        type="text"
+        placeholder="Введите название песни"
+        required
+      ></b-form-input>
+    </b-form-group>
+  </div>
+
+    <div class="b-form-group"><b-form-group id="input-group-2" label="Авторы песни:" label-for="input-2">
+      <b-form-input
+        id="input-2"
+        v-model="form_song.authors"
+        placeholder="Введите авторов песни через запятую"
+        required
+      ></b-form-input>
+    </b-form-group>
+  </div>
+    <div class="b-form-group"><b-form-group id="input-group-3" label="Клип:" label-for="input-3">
+      <b-form-input
+        id="input-3"
+        v-model="form_song.clip"
+        placeholder="Введите ссылку на клип в YouTube"
+        required
+        type="url"
+      ></b-form-input>
+    </b-form-group>
+  </div>
+    <div class="b-form-group"><b-form-group id="input-group-4" label="Год выпуска:" label-for="input-4">
+      <b-form-input
+        id="input-4"
+        v-model="form_song.year"
+        placeholder="Введите год выпуска песни"
+        required type="number"
+      ></b-form-input>
+    </b-form-group>
+  </div>
+  <div class="b-form-group"><b-form-group id="input-group-4" label="Песня:" label-for="input-5">
+  <b-form-file
+      accept=".mp3"
+      id="input-5"
+      v-model="form_song.file"
+      :state="Boolean(form_song.file)"
+      placeholder="Выберите файл или переместите его сюда.."
+      drop-placeholder="Переместите файл сюда..."
+      browse-text="Выбрать"
+    ></b-form-file></b-form-group>
+  </div>
+    <b-button type="submit" variant="danger">Добавить</b-button>
+    <b-button type="reset" variant="danger">Сброс</b-button>
+</div>
+{% endblock %}
