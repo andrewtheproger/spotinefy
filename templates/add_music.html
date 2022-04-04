@@ -8,7 +8,7 @@
     >
       <b-form-input
         id="input-1"
-        v-model="form_song.name"
+        v-model="name"
         type="text"
         placeholder="Введите название песни"
         required
@@ -19,7 +19,7 @@
     <div class="b-form-group"><b-form-group id="input-group-2" label="Авторы песни:" label-for="input-2">
       <b-form-input
         id="input-2"
-        v-model="form_song.authors"
+        v-model="authors"
         placeholder="Введите авторов песни через запятую"
         required
       ></b-form-input>
@@ -28,7 +28,7 @@
     <div class="b-form-group"><b-form-group id="input-group-3" label="Клип:" label-for="input-3">
       <b-form-input
         id="input-3"
-        v-model="form_song.clip"
+        v-model="clip"
         placeholder="Введите ссылку на клип в YouTube"
         required
         type="url"
@@ -38,7 +38,7 @@
     <div class="b-form-group"><b-form-group id="input-group-4" label="Год выпуска:" label-for="input-4">
       <b-form-input
         id="input-4"
-        v-model="form_song.year"
+        v-model="year"
         placeholder="Введите год выпуска песни"
         required type="number"
       ></b-form-input>
@@ -48,8 +48,8 @@
   <b-form-file
       accept=".mp3"
       id="input-5"
-      v-model="form_song.file"
-      :state="Boolean(form_song.file)"
+      v-model="file"
+      :state="Boolean(file)"
       placeholder="Выберите файл или переместите его сюда.."
       drop-placeholder="Переместите файл сюда..."
       browse-text="Выбрать"
@@ -57,5 +57,53 @@
   </div>
     <b-button type="submit" variant="danger">Добавить</b-button>
     <b-button type="reset" variant="danger">Сброс</b-button>
+    <script lang="Javascript">
+      var app = new Vue({
+        el: '#app',
+        data: {
+          authors: '',
+          name: '',
+          clip: '',
+          year: "",
+          file: null
+        },
+        methods: {
+          onSubmit_song(event) {
+            event.preventDefault()
+            let formData = new FormData();
+            formData.append("file", this.file);
+            formData.append("year", this.year);
+            formData.append("clip", this.clip);
+            formData.append("name", this.name);
+            formData.append("authors", this.authors);
+            axios({
+              url: "/add-music",
+              method: "POST",
+              headers: {
+              },
+              data: formData,
+            })
+            .then(function (response) {
+              console.log(response);
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          },
+          onReset(event) {
+            event.preventDefault()
+            this.clip = ''
+            this.name = ''
+            this.year = ""
+            this.authors = ""
+            this.file = null
+            this.show = false
+            this.$nextTick(() => {
+              this.show = true
+            })
+          }
+        },
+      })
+    </script>
 </div>
 {% endblock %}

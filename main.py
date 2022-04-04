@@ -18,18 +18,37 @@ app.config["CLIENT_SONGS"] = "./songs/"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["SECRET_KEY"] = "yandexlyceum_secret_key"
 
+
+@app.route("/share-song/<id>")
+def share_song(id):
+    song = db_sess.query(Song).filter(Song.id == id).first()
+    authors = ", ".join(map(lambda x: x.name, db_sess.query(Author).filter(Author.id.in_(json.loads(get_song_data(id))["authors"]))))
+    print(song.clip.replace("watch?v=", "embed/"))
+    return render_template("share.html", id=id, name=song.name, authors=authors, duration=song.duration, clip=song.clip.replace("watch?v=", "embed/"), text=get_song_text(id).split("\n"))
+
+
+
 @app.route("/get-song-text/<id>")
 def get_song_text(id):
     song = json.loads(get_song_data(id))["name"]
-    author = db_sess.query(Author).filter(Author.id == json.loads(get_song_data(id))["authors"][-1]).first().name
+    author = (
+        db_sess.query(Author)
+        .filter(Author.id == json.loads(get_song_data(id))["authors"][-1])
+        .first()
+        .name
+    )
     responce = requests.get(
         f"http://api.chartlyrics.com/apiv1.asmx/SearchLyric?artist={author}&song={song}"
     )
     data = json.loads(json.dumps(xmltodict.parse(responce.content)))[
         "ArrayOfSearchLyricResult"
     ]["SearchLyricResult"][0]
-    responce = requests.get(f"http://api.chartlyrics.com/apiv1.asmx/GetLyric?lyricId={data['LyricId']}&lyricCheckSum={data['LyricChecksum']}")
-    return json.loads(json.dumps(xmltodict.parse(responce.content)))["GetLyricResult"]["Lyric"]
+    responce = requests.get(
+        f"http://api.chartlyrics.com/apiv1.asmx/GetLyric?lyricId={data['LyricId']}&lyricCheckSum={data['LyricChecksum']}"
+    )
+    return json.loads(json.dumps(xmltodict.parse(responce.content)))["GetLyricResult"][
+        "Lyric"
+    ]
 
 
 @app.route("/")
@@ -42,21 +61,29 @@ def index():
 def add_music():
     if request.method == "POST":
         file = request.files["file"]
-        
+
         f = open(
             os.path.join(app.config["CLIENT_SONGS"], f"{request.form['name']}.mp3"),
             "wb+",
         )
         f.close()
-        file.save(os.path.join(app.config["CLIENT_SONGS"], f"{request.form['name']}.mp3"))
+        file.save(
+            os.path.join(app.config["CLIENT_SONGS"], f"{request.form['name']}.mp3")
+        )
         db_sess = db_session.create_session()
         song = Song()
         song.name = request.form["name"]
         song.clip = request.form["clip"]
         song.year = int(request.form["year"])
         for author in request.form["authors"].split(","):
-            song.authors.append(db_sess.query(Author).filter(Author.name == author.strip()).first())
-        song.duration = int(MP3(os.path.join(app.config["CLIENT_SONGS"], f"{request.form['name']}.mp3")).info.length)
+            song.authors.append(
+                db_sess.query(Author).filter(Author.name == author.strip()).first()
+            )
+        song.duration = int(
+            MP3(
+                os.path.join(app.config["CLIENT_SONGS"], f"{request.form['name']}.mp3")
+            ).info.length
+        )
         db_sess.add(song)
         db_sess.commit()
     return render_template("add_music.html")
@@ -78,8 +105,9 @@ def get_song_file(id):
 def get_song_data(id):
     res = {}
     song = db_sess.query(Song).filter(Song.id == id).first()
-    res["authors"] = list(map(lambda x: x.author_id, db_sess.query(Link).filter(Link.song_id == id)))
-    print(res["authors"])
+    res["authors"] = list(
+        map(lambda x: x.author_id, db_sess.query(Link).filter(Link.song_id == id))
+    )
     res["year"] = song.year
     res["duration"] = song.duration
     res["name"] = song.name

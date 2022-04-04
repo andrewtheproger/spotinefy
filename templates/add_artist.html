@@ -8,7 +8,7 @@
     >
       <b-form-input
         id="input-1"
-        v-model="form_artist.name"
+        v-model="name"
         type="text"
         placeholder="Введите имя артиста"
         required
@@ -19,8 +19,8 @@
   <b-form-file
       accept="image/*"
       id="input-5"
-      v-model="form_artist.file"
-      :state="Boolean(form_artist.file)"
+      v-model="file"
+      :state="Boolean(file)"
       placeholder="Выберите файл или переместите его сюда.."
       drop-placeholder="Переместите файл сюда..."
       browse-text="Выбрать"
@@ -28,5 +28,28 @@
   </div>
     <b-button type="submit" variant="danger">Добавить</b-button>
     <b-button type="reset" variant="danger">Сброс</b-button>
+    <script lang="Javascript">
+      var app = new Vue({
+        el: '#app',
+        data: {
+          name: "",
+          file: null
+        },
+        methods: {
+          onSubmit_artist(event){
+            {}
+          },
+          onReset(event) {
+            event.preventDefault()
+            this.file = null
+            this.name = ''
+            this.show = false
+            this.$nextTick(() => {
+              this.show = true
+            })
+          }
+        },
+      })
+    </script>
 </div>
 {% endblock %}

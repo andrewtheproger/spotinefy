@@ -30,4 +30,21 @@ header {
   position: sticky;
   width: 100%;
   top: 0;
-} 
+}
+div.share {
+  text-align: center;
+}
+.display{
+  display: block !important   
+}
+.no-display{
+  display: none !important
+}
+.play {
+  padding-top: 3em;
+  padding-bottom: 3em;
+}
+.progress-line {
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+}

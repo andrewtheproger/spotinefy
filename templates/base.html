@@ -17,6 +17,7 @@
       rel="stylesheet"
       href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css"
     />
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
@@ -78,69 +79,9 @@
           </b-collapse>
         </b-navbar>
       </header>
-      <main role="main" class="container">
+      <main >
         {% block content %}{% endblock %}
       </main>
     </div>
-    <script lang="Javascript">
-      var app = new Vue({
-        el: '#app',
-        data: {
-          message: 'Hello Vue!',
-          form_song: {
-            authors: '',
-            name: '',
-            clip: '',
-            year: "",
-            file: null
-          },
-          form_artist: {
-            name: "",
-            file: null
-          }
-        },
-        methods: {
-          onSubmit_song(event) {
-            event.preventDefault()
-            let formData = new FormData();
-            formData.append("file", this.form_song.file);
-            formData.append("year", this.form_song.year);
-            formData.append("clip", this.form_song.clip);
-            formData.append("name", this.form_song.name);
-            formData.append("authors", this.form_song.authors);
-            axios({
-              url: "/add-music",
-              method: "POST",
-              headers: {
-              },
-              data: formData,
-            })
-            .then(function (response) {
-              console.log(response);
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-          },
-          onSubmit_artist(event){
-            {}
-          },
-          onReset(event) {
-            event.preventDefault()
-            this.form_song.clip = ''
-            this.form_song.name = ''
-            this.form_song.year = ""
-            this.form_song.authors = ""
-            this.form_song.file = null
-            this.form_artist.file = null
-            this.form_artist.name = ''
-            this.show = false
-            this.$nextTick(() => {
-              this.show = true
-            })
-          }
-        }
-      })
-    </script>
   </body>
 </html>

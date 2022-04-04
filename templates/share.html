@@ -1,0 +1,96 @@
+{% extends "base.html" %} {% block content %}
+<div class="share">
+  <h1>{{name}} - {{authors}}</h1>
+  <p id="id" style="display: none">{{id}}</p>
+  <p id="duration" style="display: none">{{duration}}</p>
+  <audio id="player" src="/get-song-file/{{id}}" loop></audio>
+  <div>
+    <div class="play">
+      <b-container class="bv-example-row" fluid>
+        <b-row>
+          <b-col cols="1">
+            <b-avatar variant="danger" button @click="togglePlay"
+              ><b-icon :class="play_icon" icon="play-circle-fill"> </b-icon
+              ><b-icon :class="pause_icon" icon="pause-circle-fill"> </b-icon
+            ></b-avatar>
+          </b-col>
+          <b-col>
+            <div class="progress-line">
+              <b-progress
+                :value="cur_time"
+                :max="duration"
+                class="mb-3"
+                variant="danger"
+              ></b-progress>
+            </div>
+          </b-col>
+          <b-col cols="2">
+            <b-button v-b-toggle.sidebar-1 variant="danger"
+              >Показать текст</b-button
+            >
+          </b-col>
+          <b-col cols="2">
+            <div style="display: flex;">
+              <b-icon icon="speaker" style="height: 2.5em;"></b-icon>
+              <b-form-spinbutton id="demo-sb" v-model="volume" min="0" max="100"></b-form-spinbutton>
+            </div>
+          </b-col>
+        </b-row>
+      </b-container>
+    </div>
+    <iframe width="420" height="315"
+    src="{{clip}}">
+</iframe>
+  </div>
+  <b-sidebar id="sidebar-1" title="Текст песни {{name}}" shadow>
+    <div class="px-3 py-2">
+      {% for line in text %}
+      <p>{{line}}</p>
+      {% endfor %}
+    </div>
+  </b-sidebar>
+
+  <script lang="Javascript">
+    var app = new Vue({
+      el: '#app',
+      data: {
+        play: false,
+        cur_time: 0,
+        id: document.getElementById('id').innerText,
+        duration: document.getElementById('duration').innerText,
+        play_icon: "display",
+        pause_icon: "no-display",
+        volume: 50
+      },
+      mounted: function () {
+        setInterval(function() {
+          if (app.play) {
+            app.cur_time += 1
+            if (app.cur_time > app.duration) {
+                app.cur_time = 0
+            }
+            console.log(app.volume)
+            document.getElementById('player').volume = app.volume / 100
+          }
+        }, 1000);
+      },
+      methods: {
+        togglePlay(event) {
+                event.preventDefault()
+                this.play = !this.play
+                if (this.play_icon === "display") {
+                    this.play_icon = "no-display"
+                    this.pause_icon = "display"
+                    document.getElementById("player").play();
+                }
+                else {
+                    this.pause_icon = "no-display"
+                    this.play_icon = "display"
+                    document.getElementById("player").pause();
+                }
+              }
+      }
+    })
+  </script>
+</div>
+{% endblock %}
