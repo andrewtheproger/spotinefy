@@ -3,6 +3,8 @@ from re import S
 from mutagen.mp3 import MP3
 from data import db_session
 from flask import Flask, render_template, request, url_for, redirect
+
+from data.register_form import RegisterForm
 from data.songs import Song
 from data.authors import Author
 from data.links import Link
@@ -11,6 +13,8 @@ import xmltodict
 from pprint import pprint
 import json
 import requests
+
+from data.users import User
 
 UPLOAD_FOLDER = "./static/img/"
 app = Flask(__name__)
@@ -26,6 +30,31 @@ def share_song(id):
     print(song.clip.replace("watch?v=", "embed/"))
     return render_template("share.html", id=id, name=song.name, authors=authors, duration=song.duration, clip=song.clip.replace("watch?v=", "embed/"), text=get_song_text(id).split("\n"))
 
+@app.route('/', methods=['GET', 'POST'])
+def reqister():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        if form.password.data != form.password_again.data:
+            return render_template('register.html', title='Регистрация',
+                                   form=form,
+                                   message="Пароли не совпадают")
+        db_sess = db_session.create_session()
+        if db_sess.query(User).filter(User.email == form.email.data).first():
+            return render_template('register.html', title='Регистрация',
+                                   form=form,
+                                   message="Такой пользователь уже есть")
+        user = User(
+            name=form.name.data,
+            surname=form.surname.data,
+            nic=form.nic.data,
+            email=form.email.data,
+        )
+        user.set_password(form.password.data)
+        db_sess.add(user)
+        db_sess.commit()
+        nic = form.nic.data
+        return redirect('/music')
+    return render_template('register.html', title='Регистрация', form=form)
 
 
 @app.route("/get-song-text/<id>")
@@ -51,7 +80,6 @@ def get_song_text(id):
     ]
 
 
-@app.route("/")
 @app.route("/music")
 def index():
     return render_template("index.html")
