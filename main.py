@@ -3,7 +3,9 @@ from re import S
 from mutagen.mp3 import MP3
 from data import db_session
 from flask import Flask, render_template, request, url_for, redirect
-
+from flask_login import current_user
+from flask import Flask, render_template, session
+from data.edit import EditForm
 from data.register_form import RegisterForm
 from data.songs import Song
 from data.authors import Author
@@ -13,6 +15,7 @@ import xmltodict
 from pprint import pprint
 import json
 import requests
+from flask_login import LoginManager, UserMixin,  login_required, login_user, current_user, logout_user
 
 from data.users import User
 
@@ -21,7 +24,8 @@ app = Flask(__name__)
 app.config["CLIENT_SONGS"] = "./songs/"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["SECRET_KEY"] = "yandexlyceum_secret_key"
-
+user_email = ''
+nic = ''
 
 @app.route("/share-song/<id>")
 def share_song(id):
@@ -32,6 +36,7 @@ def share_song(id):
 
 @app.route('/', methods=['GET', 'POST'])
 def reqister():
+    global user_email, nic
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
@@ -49,6 +54,11 @@ def reqister():
             nic=form.nic.data,
             email=form.email.data,
         )
+        # session['name'] = form.name.data
+        # session['surname'] = form.surname.data
+        # session['nic'] = form.nic.data
+        user_email = form.email.data
+        nic = form.nic.data
         user.set_password(form.password.data)
         db_sess.add(user)
         db_sess.commit()
@@ -147,6 +157,52 @@ def add_artist():
     if request.method == "GET":
         return render_template("add_artist.html")
 
+
+@app.route('/setting', methods=['GET', 'POST'])
+def edit_users():
+    global user_email
+    form = EditForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        users = db_sess.query(User).filter(User.email == user_email
+                                          ).first()
+        if users:
+            form.name.data = users.name
+            form.surname.data = users.surname
+            form.nic.data = users.nic
+            form.email.data = users.email
+            form.password.data = users.password
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        users = db_sess.query(User).filter(User.email == user_email
+                                          ).first()
+        if users:
+            if form.password.data == form.password_again.data:
+                users.name = form.name.data
+                users.surname = form.surname.data
+                users.nic = form.nic.data
+                users.email = form.email.data
+                users.password = form.password.data
+                db_sess.commit()
+                return redirect('/music')
+            else:
+                return render_template('settings.html', title='Настройки',
+                                       form=form,
+                                       message="Пароли не совпадают")
+        else:
+            abort(404)
+    return render_template('settings.html',
+                           title='Настройки',
+                           form=form
+                           )
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
 
 if __name__ == "__main__":
     db_session.global_init("db/service.db")

@@ -4,12 +4,11 @@ from wtforms import EmailField, BooleanField, PasswordField, SubmitField, String
 from wtforms.validators import DataRequired
 
 
-class RegisterForm(FlaskForm):
+class EditForm(FlaskForm):
     name = StringField('Имя', validators=[DataRequired()])
     surname = StringField('Фамилия', validators=[DataRequired()])
-    nic = StringField('Придумайте ник:', validators=[DataRequired()])
+    nic = StringField('Ник:', validators=[DataRequired()])
     email = EmailField('Почта', validators=[DataRequired()])
     password = PasswordField('Пароль', validators=[DataRequired()])
     password_again = PasswordField('Повторно введите пароль', validators=[DataRequired()])
-    remember_me = BooleanField('Запомнить меня')
-    submit = SubmitField('Зарегистрироваться')
+    submit = SubmitField('Применить')
