@@ -34,7 +34,7 @@ def share_song(id):
     return render_template("share.html", id=id, name=song.name, authors=authors, duration=song.duration, clip=song.clip.replace("watch?v=", "embed/"), text=get_song_text(id).split("\n"))
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/reg', methods=['GET', 'POST'])
 def reqister():
     if request.method == "POST":
         global user_email, nic
@@ -153,76 +153,56 @@ def add_artist():
     if request.method == "GET":
         return render_template("add_artist.html", nic=nic)
 
-# global user_email
-#     form = EditForm()
-#     if request.method == "GET":
-#         db_sess = db_session.create_session()
-#         users = db_sess.query(User).filter(User.email == user_email
-#                                           ).first()
-#         if users:
-#             form.name.data = users.name
-#             form.surname.data = users.surname
-#             form.nic.data = users.nic
-#             form.email.data = users.email
-#             form.password.data = users.password
-#         else:
-#             abort(404)
-#     if form.validate_on_submit():
-#         db_sess = db_session.create_session()
-#         users = db_sess.query(User).filter(User.email == user_email
-#                                           ).first()
-#         if users:
-#             if form.password.data == form.password_again.data:
-#                 users.name = form.name.data
-#                 users.surname = form.surname.data
-#                 users.nic = form.nic.data
-#                 users.email = form.email.data
-#                 users.password = form.password.data
-#                 db_sess.commit()
-#                 return redirect('/music')
-#             else:
-#                 return render_template('settings.html', title='Настройки',
-#                                        form=form,
-#                                        message="Пароли не совпадают")
-#         else:
-#             abort(404)
-#     return render_template('settings.html',
-#                            title='Настройки',
-#                            form=form
-#                            )
 
 @app.route('/setting', methods=['GET', 'POST'])
 def edit_news():
     global user_email
-    # if request.method == "POST":
-    #     db_sess = db_session.create_session()
-    #     users = db_sess.query(User).filter(User.email == user_email
-    #                                        ).first()
-    #     if users:
-    #         if request.form["password"] == request.form["passwordagain"]:
-    #             users.name = request.form["name"]
-    #             users.surname = request.form["surname"]
-    #             users.nic = request.form["nic"]
-    #             users.email = request.form["email"]
-    #             users.password = request.form["email"]
-    #             db_sess.commit()
-    #             return redirect('/music')
-    #         else:
-    #             return render_template('settings.html', title='Настройки',
-    #                                    message="Пароли не совпадают")
-    #     else:
-    #         abort(404)
+    form = EditForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        users = db_sess.query(User).filter(User.email == user_email
+                                           ).first()
+        if users:
+            form.name.data = users.name
+            form.surname.data = users.surname
+            form.nic.data = users.nic
+            form.email.data = users.email
+            form.password.data = users.password
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        users = db_sess.query(User).filter(User.email == user_email
+                                           ).first()
+        if users:
+            if form.password.data == form.password_again.data:
+                users.name = form.name.data
+                users.surname = form.surname.data
+                users.nic = form.nic.data
+                users.email = form.email.data
+                users.password = form.password.data
+                db_sess.commit()
+                return redirect('/music')
+            else:
+                return render_template('settings.html', title='Настройки',
+                                       form=form,
+                                       message="Пароли не совпадают")
+        else:
+            abort(404)
     return render_template('settings.html',
-                           title='Настройки', name=request.form["name"], surname=request.form["surname"],
-                           nic=request.form["nic"], email=request.form["email"],
-                           password=request.form["password"]
+                           title='Настройки',
+                           form=form
                            )
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect("/")
+    return redirect("/reg")
+
+@app.route('/')
+def start():
+    return render_template("start.html")
 
 if __name__ == "__main__":
     db_session.global_init("db/service.db")
