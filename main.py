@@ -52,12 +52,39 @@ def reqister():
         users.email = request.form["email"]
         users.password = request.form["password"]
         user_email = request.form["email"]
+        print(user_email)
         nic = request.form["nic"]
         users.set_password(request.form["password"])
         db_sess.add(users)
         db_sess.commit()
-        return redirect('/music')
     return render_template("register.html")
+
+
+@app.route("/get-charts")
+def get_chart():
+    data = []
+    for user in db_sess.query(Song).all():
+        id = user.id
+        song = json.loads(get_song_data(id))["name"]
+        author = (
+            db_sess.query(Author)
+                .filter(Author.id == json.loads(get_song_data(id))["authors"][-1])
+                .first()
+                .name
+        )
+        responce = requests.get(
+            f"http://api.chartlyrics.com/apiv1.asmx/SearchLyric?artist={author}&song={song}"
+        )
+        data.append(user.name + " " + json.loads(json.dumps(xmltodict.parse(responce.content)))[
+            "ArrayOfSearchLyricResult"
+        ]["SearchLyricResult"][0]["SongRank"] + "\n")
+    return str(data)
+        # responce = requests.get(
+        #     f"http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?LyricRank={data['SongUrl']}&lyricCheckSum={data['LyricChecksum']}"
+        # )
+        # return json.loads(json.dumps(xmltodict.parse(responce.content)))["GetLyricResult"][
+        #     "Lyric"
+        # ]
 
 
 @app.route("/get-song-text/<id>")
