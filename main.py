@@ -209,6 +209,7 @@ def edit_users():
         db_sess = db_session.create_session()
         users = db_sess.query(User).filter(User.email == user_email
                                           ).first()
+        nic = users.nic
         if users:
             form.name.data = users.name
             form.surname.data = users.surname
@@ -226,6 +227,7 @@ def edit_users():
                 users.name = form.name.data
                 users.surname = form.surname.data
                 users.nic = form.nic.data
+                nic = form.nic.data
                 users.email = form.email.data
                 users.password = form.password.data
                 db_sess.commit()
@@ -233,12 +235,14 @@ def edit_users():
             else:
                 return render_template('settings.html', title='Настройки',
                                        form=form,
-                                       message="Пароли не совпадают")
+                                       message="Пароли не совпадают",
+                                       nic = nic)
         else:
             abort(404)
     return render_template('settings.html',
                            title='Настройки',
-                           form=form
+                           form=form, 
+                           nic = nic
                            )
 
 

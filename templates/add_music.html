@@ -69,7 +69,6 @@
         },
         methods: {
           onSubmit_song(event) {
-            event.preventDefault()
             let formData = new FormData();
             formData.append("file", this.file);
             formData.append("year", this.year);
@@ -91,7 +90,6 @@
             });
           },
           onReset(event) {
-            event.preventDefault()
             this.clip = ''
             this.name = ''
             this.year = ""
