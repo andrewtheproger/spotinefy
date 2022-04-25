@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, url_for, redirect
 from flask_login import current_user
 from flask import Flask, render_template, session
 from data.edit import EditForm
+from data.register_form import RegisterForm
 from data.songs import Song
 from data.authors import Author
 from data.links import Link
@@ -33,6 +34,9 @@ def share_song(id):
     print(song.clip.replace("watch?v=", "embed/"))
     return render_template("share.html", id=id, name=song.name, authors=authors, duration=song.duration, clip=song.clip.replace("watch?v=", "embed/"), text=get_song_text(id).split("\n"))
 
+@app.route('/')
+def start():
+    return render_template("start.html")
 
 @app.route('/reg', methods=['GET', 'POST'])
 def reqister():
@@ -52,39 +56,12 @@ def reqister():
         users.email = request.form["email"]
         users.password = request.form["password"]
         user_email = request.form["email"]
-        print(user_email)
         nic = request.form["nic"]
         users.set_password(request.form["password"])
         db_sess.add(users)
         db_sess.commit()
+        return redirect('/music')
     return render_template("register.html")
-
-
-@app.route("/get-charts")
-def get_chart():
-    data = []
-    for user in db_sess.query(Song).all():
-        id = user.id
-        song = json.loads(get_song_data(id))["name"]
-        author = (
-            db_sess.query(Author)
-                .filter(Author.id == json.loads(get_song_data(id))["authors"][-1])
-                .first()
-                .name
-        )
-        responce = requests.get(
-            f"http://api.chartlyrics.com/apiv1.asmx/SearchLyric?artist={author}&song={song}"
-        )
-        data.append(user.name + " " + json.loads(json.dumps(xmltodict.parse(responce.content)))[
-            "ArrayOfSearchLyricResult"
-        ]["SearchLyricResult"][0]["SongRank"] + "\n")
-    return str(data)
-        # responce = requests.get(
-        #     f"http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?LyricRank={data['SongUrl']}&lyricCheckSum={data['LyricChecksum']}"
-        # )
-        # return json.loads(json.dumps(xmltodict.parse(responce.content)))["GetLyricResult"][
-        #     "Lyric"
-        # ]
 
 
 @app.route("/get-song-text/<id>")
@@ -112,13 +89,26 @@ def get_song_text(id):
 
 @app.route("/music")
 def index():
-    global nic
-    return render_template("index.html", nic=nic)
+    return render_template("index.html")
+
+@app.route("/artists")
+def artists():
+    auther = db_sess.query(Author).all()
+    for user in db_sess.query(Author).all():
+        print(user.name)
+    return render_template("artists.html", auther=auther)
+
+@app.route("/charts")
+def charts_music():
+    pass
+    # responce = requests.get(
+    #     f"http://ws.audioscrobbler.com/2.0/?method=geo.gettoptracks&country=Russia&api_key=cc197bad-dc9c-440d-a5b5-d52ba2e14234"
+    # )
+    # return json.loads(json.dumps(xmltodict.parse(responce.content)))
 
 
 @app.route("/add-music", methods=["POST", "GET"])
 def add_music():
-    global nic
     if request.method == "POST":
         file = request.files["file"]
 
@@ -146,7 +136,7 @@ def add_music():
         )
         db_sess.add(song)
         db_sess.commit()
-    return render_template("add_music.html", nic=nic)
+    return render_template("add_music.html")
 
 
 @app.route("/get-song-file/<id>")
@@ -176,19 +166,18 @@ def get_song_data(id):
 
 @app.route("/add-artist", methods=["POST", "GET"])
 def add_artist():
-    global nic
     if request.method == "GET":
-        return render_template("add_artist.html", nic=nic)
+        return render_template("add_artist.html")
 
 
 @app.route('/setting', methods=['GET', 'POST'])
-def edit_news():
+def edit_users():
     global user_email
     form = EditForm()
     if request.method == "GET":
         db_sess = db_session.create_session()
         users = db_sess.query(User).filter(User.email == user_email
-                                           ).first()
+                                          ).first()
         if users:
             form.name.data = users.name
             form.surname.data = users.surname
@@ -200,7 +189,7 @@ def edit_news():
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         users = db_sess.query(User).filter(User.email == user_email
-                                           ).first()
+                                          ).first()
         if users:
             if form.password.data == form.password_again.data:
                 users.name = form.name.data
@@ -225,11 +214,7 @@ def edit_news():
 @login_required
 def logout():
     logout_user()
-    return redirect("/reg")
-
-@app.route('/')
-def start():
-    return render_template("start.html")
+    return redirect("/")
 
 if __name__ == "__main__":
     db_session.global_init("db/service.db")

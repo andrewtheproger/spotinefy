@@ -18,7 +18,6 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
-    photo = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
     def repr(self):
         return f'<Colonist> {self.id} {self.surname} {self.name}'

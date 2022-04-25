@@ -1,0 +1,57 @@
+{% extends "base.html" %} {% block content %}
+<div>
+    {% for user in auther: %}
+        <h3>{{user.name}}</h3>
+        <img src={{user.photo}} alt='' />
+    {% endfor %}
+</div>
+    <script lang="Javascript">
+      var app = new Vue({
+        el: '#app',
+        data: {
+          authors: '',
+          name: '',
+          clip: '',
+          year: "",
+          file: null
+        },
+        methods: {
+          onSubmit_song(event) {
+            event.preventDefault()
+            let formData = new FormData();
+            formData.append("file", this.file);
+            formData.append("year", this.year);
+            formData.append("clip", this.clip);
+            formData.append("name", this.name);
+            formData.append("authors", this.authors);
+            axios({
+              url: "/artists",
+              method: "GET",
+              headers: {
+              },
+              data: formData,
+            })
+            .then(function (response) {
+              console.log(response);
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          },
+          onReset(event) {
+            event.preventDefault()
+            this.clip = ''
+            this.name = ''
+            this.year = ""
+            this.authors = ""
+            this.file = null
+            this.show = false
+            this.$nextTick(() => {
+              this.show = true
+            })
+          }
+        },
+      })
+    </script>
+</div>
+{% endblock %}
