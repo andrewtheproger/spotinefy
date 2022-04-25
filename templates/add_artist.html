@@ -37,7 +37,22 @@
         },
         methods: {
           onSubmit_artist(event){
-            {}
+            let formData = new FormData();
+            formData.append("file", this.file);
+            formData.append("name", this.name);
+            axios({
+              url: "/add-artist",
+              method: "POST",
+              headers: {
+              },
+              data: formData,
+            })
+            .then(function (response) {
+              console.log(response);
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
           },
           onReset(event) {
             event.preventDefault()

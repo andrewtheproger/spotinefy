@@ -3,9 +3,10 @@ from re import S
 from mutagen.mp3 import MP3
 from data import db_session
 from flask import Flask, render_template, request, url_for, redirect
+from flask_login import current_user
 from flask import Flask, render_template, session
-
 from data.edit import EditForm
+from data.register_form import RegisterForm
 from data.songs import Song
 from data.authors import Author
 from data.links import Link
@@ -17,7 +18,6 @@ import requests
 from flask_login import LoginManager, UserMixin,  login_required, login_user, current_user, logout_user
 
 from data.users import User
-
 
 UPLOAD_FOLDER = "./static/img/"
 app = Flask(__name__)
@@ -60,6 +60,7 @@ def reqister():
         users.set_password(request.form["password"])
         db_sess.add(users)
         db_sess.commit()
+        return redirect('/music')
     return render_template("register.html")
 
 
@@ -88,12 +89,14 @@ def get_song_text(id):
 
 @app.route("/music")
 def index():
-    return render_template("index.html", nic=nic)
+    return render_template("index.html")
 
 @app.route("/artists")
 def artists():
     auther = db_sess.query(Author).all()
-    return render_template("artists.html", auther=auther, nic=nic)
+    for user in db_sess.query(Author).all():
+        print(user.name)
+    return render_template("artists.html", auther=auther)
 
 @app.route("/charts")
 def charts_music():
@@ -133,7 +136,7 @@ def add_music():
         )
         db_sess.add(song)
         db_sess.commit()
-    return render_template("add_music.html", nic=nic)
+    return render_template("add_music.html")
 
 
 @app.route("/get-song-file/<id>")
@@ -164,7 +167,7 @@ def get_song_data(id):
 @app.route("/add-artist", methods=["POST", "GET"])
 def add_artist():
     if request.method == "GET":
-        return render_template("add_artist.html", nic=nic)
+        return render_template("add_artist.html")
 
 
 @app.route('/setting', methods=['GET', 'POST'])
@@ -175,7 +178,6 @@ def edit_users():
         db_sess = db_session.create_session()
         users = db_sess.query(User).filter(User.email == user_email
                                           ).first()
-        nic = users.nic
         if users:
             form.name.data = users.name
             form.surname.data = users.surname
@@ -193,7 +195,6 @@ def edit_users():
                 users.name = form.name.data
                 users.surname = form.surname.data
                 users.nic = form.nic.data
-                nic = form.nic.data
                 users.email = form.email.data
                 users.password = form.password.data
                 db_sess.commit()
@@ -201,14 +202,12 @@ def edit_users():
             else:
                 return render_template('settings.html', title='Настройки',
                                        form=form,
-                                       message="Пароли не совпадают",
-                                       nic = nic)
+                                       message="Пароли не совпадают")
         else:
             abort(404)
     return render_template('settings.html',
                            title='Настройки',
-                           form=form,
-                           nic = nic
+                           form=form
                            )
 
 @app.route('/logout')
