@@ -9,7 +9,6 @@ class Author(SqlAlchemyBase):
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    photo = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     songs = orm.relationship("Song", secondary="links")
 
 

@@ -1,12 +1,10 @@
 import os
-from re import S
+import re
 from mutagen.mp3 import MP3
 from data import db_session
 from flask import Flask, render_template, request, url_for, redirect
-from flask_login import current_user
 from flask import Flask, render_template, session
 from data.edit import EditForm
-from data.register_form import RegisterForm
 from data.songs import Song
 from data.authors import Author
 from data.links import Link
@@ -15,17 +13,19 @@ import xmltodict
 from pprint import pprint
 import json
 import requests
-from flask_login import LoginManager, UserMixin,  login_required, login_user, current_user, logout_user
+from flask_login import login_required, logout_user
+from PIL import Image
 
 from data.users import User
 
-UPLOAD_FOLDER = "./static/img/"
+UPLOAD_FOLDER = "./photos/"
 app = Flask(__name__)
 app.config["CLIENT_SONGS"] = "./songs/"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["SECRET_KEY"] = "yandexlyceum_secret_key"
 user_email = ''
 nic = ''
+
 
 @app.route("/share-song/<id>")
 def share_song(id):
@@ -34,9 +34,11 @@ def share_song(id):
     print(song.clip.replace("watch?v=", "embed/"))
     return render_template("share.html", id=id, name=song.name, authors=authors, duration=song.duration, clip=song.clip.replace("watch?v=", "embed/"), text=get_song_text(id).split("\n"))
 
+
 @app.route('/')
 def start():
     return render_template("start.html")
+
 
 @app.route('/reg', methods=['GET', 'POST'])
 def reqister():
@@ -91,12 +93,21 @@ def get_song_text(id):
 def index():
     return render_template("index.html")
 
+
+@app.route("/get-artists-photo/<int:id>")
+def artists_photo(id):
+    return send_from_directory(
+        app.config["UPLOAD_FOLDER"],
+        str(id) + ".jpg",
+        as_attachment=True,
+    )
+
+
 @app.route("/artists")
 def artists():
-    auther = db_sess.query(Author).all()
-    for user in db_sess.query(Author).all():
-        print(user.name)
-    return render_template("artists.html", auther=auther)
+    authors = db_sess.query(Author).all()
+    return render_template("artists.html", authors=authors)
+
 
 @app.route("/charts")
 def charts_music():
@@ -125,6 +136,7 @@ def add_music():
         song.name = request.form["name"]
         song.clip = request.form["clip"]
         song.year = int(request.form["year"])
+        print(request.form["authors"].split(","))
         for author in request.form["authors"].split(","):
             song.authors.append(
                 db_sess.query(Author).filter(Author.name == author.strip()).first()
@@ -166,8 +178,27 @@ def get_song_data(id):
 
 @app.route("/add-artist", methods=["POST", "GET"])
 def add_artist():
-    if request.method == "GET":
-        return render_template("add_artist.html")
+    if request.method == "POST":
+        print(request.form["name"])
+        db_sess = db_session.create_session()
+        artist = Author()
+        artist.name = request.form["name"]
+        db_sess.add(artist)
+        db_sess.commit()
+        id = db_sess.query(Author).filter(Author.name == request.form["name"]).first().id
+        file = request.files["file"]
+        f = open(
+            os.path.join(app.config["UPLOAD_FOLDER"], f"{id}.jpg"),
+            "wb+",
+        )
+        f.close()
+        file.save(
+            os.path.join(app.config["UPLOAD_FOLDER"], f"{id}.jpg")
+        )
+        im = Image.open(os.path.join(app.config["UPLOAD_FOLDER"], f"{id}.jpg"))
+        im2 = im.resize((300, 300))
+        im2.save(os.path.join(app.config["UPLOAD_FOLDER"], f"{id}.jpg"))
+    return render_template("add_artist.html")
 
 
 @app.route('/setting', methods=['GET', 'POST'])
@@ -210,11 +241,13 @@ def edit_users():
                            form=form
                            )
 
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect("/")
+
 
 if __name__ == "__main__":
     db_session.global_init("db/service.db")

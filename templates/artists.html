@@ -1,8 +1,8 @@
 {% extends "base.html" %} {% block content %}
 <div>
-    {% for user in auther: %}
-        <h3>{{user.name}}</h3>
-        <img src={{user.photo}} alt='' />
+    {% for author in authors: %}
+        <h3>{{author.name}}</h3>
+        <img src=/get-artists-photo/{{author.id}} alt='' />
     {% endfor %}
 </div>
     <script lang="Javascript">
