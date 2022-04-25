@@ -7,7 +7,7 @@ click==8.0.4
 colorama==0.4.4
 ffmpeg==1.4
 Flask==2.0.3
-Flask-Login==0.6.0
+Flask-login==0.6.0
 Flask-WTF==1.0.1
 greenlet==1.1.2
 idna==3.3
