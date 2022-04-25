@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Настройки пользователя</h1>
+<div>
+<h1>Настройки пользователя {{nic}}</h1>
 <form action="" method="post">
     {{ form.hidden_tag() }}
     <p>
@@ -61,4 +62,59 @@
     <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
     {{message}}
 </form>
+<script lang="Javascript">
+    var app = new Vue({
+      el: '#app',
+      data: {
+        name: '',
+        surname: '',
+        nic: '',
+          password: '',
+          passwordagain: '',
+        email: "",
+        file: null
+      },
+      methods: {
+        onSubmit_song(event) {
+          event.preventDefault()
+          let formData = new FormData();
+          formData.append("file", this.file);
+          formData.append("surname", this.surname);
+          formData.append("nic", this.nic);
+          formData.append("name", this.name);
+          formData.append("password", this.password);
+          formData.append("passwordagain", this.passwordagain);
+          formData.append("email", this.email);
+          axios({
+            url: "/",
+            method: "POST",
+            headers: {
+            },
+            data: formData,
+          })
+          .then(function (response) {
+            console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        },
+        onReset(event) {
+          event.preventDefault()
+          this.surname = ''
+          this.name = ''
+          this.nic = ""
+          this.email = ""
+            this.password = ""
+            this.passwordagain = ""
+          this.file = null
+          this.show = false
+          this.$nextTick(() => {
+            this.show = true
+          })
+        }
+      },
+    })
+  </script>
+</div>
 {% endblock %}
