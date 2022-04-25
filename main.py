@@ -6,7 +6,6 @@ from flask import Flask, render_template, request, url_for, redirect
 from flask_login import current_user
 from flask import Flask, render_template, session
 from data.edit import EditForm
-from data.register_form import RegisterForm
 from data.songs import Song
 from data.authors import Author
 from data.links import Link
