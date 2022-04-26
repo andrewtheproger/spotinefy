@@ -48,3 +48,9 @@ div.share {
   margin-top: auto !important;
   margin-bottom: auto !important;
 }
+.artist {
+  margin: 1rem;
+}
+.search {
+  margin: 0.5rem;
+}
