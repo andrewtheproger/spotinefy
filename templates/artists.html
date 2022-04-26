@@ -6,7 +6,9 @@
     {% endfor %}
 </div>
     <script lang="Javascript">
-      var app = new Vue({el: '#app'})
+      var app = new Vue({el: '#app', data: {
+          req: '',
+          }})
     </script>
 </div>
 {% endblock %}

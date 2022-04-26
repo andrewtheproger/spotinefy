@@ -6,7 +6,6 @@ from flask import Flask, render_template, request, url_for, redirect
 from flask_login import current_user
 from flask import Flask, render_template, session
 from data.edit import EditForm
-from data.register_form import RegisterForm
 from data.songs import Song
 from data.authors import Author
 from data.links import Link
@@ -18,10 +17,20 @@ import requests
 from flask_login import LoginManager, UserMixin,  login_required, login_user, current_user, logout_user
 
 from data.users import User
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    login_required,
+    login_user,
+    current_user,
+    logout_user,
+)
+from PIL import Image
 
-UPLOAD_FOLDER = "./static/img/"
+
 app = Flask(__name__)
 app.config["CLIENT_SONGS"] = "./songs/"
+UPLOAD_FOLDER = "./photos/"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["SECRET_KEY"] = "yandexlyceum_secret_key"
 user_email = ''
@@ -30,9 +39,70 @@ nic = ''
 @app.route("/share-song/<id>")
 def share_song(id):
     song = db_sess.query(Song).filter(Song.id == id).first()
-    authors = ", ".join(map(lambda x: x.name, db_sess.query(Author).filter(Author.id.in_(json.loads(get_song_data(id))["authors"]))))
+    authors = ", ".join(
+        map(
+            lambda x: x.name,
+            db_sess.query(Author).filter(
+                Author.id.in_(json.loads(get_song_data(id))["authors"])
+            ),
+        )
+    )
     print(song.clip.replace("watch?v=", "embed/"))
-    return render_template("share.html", id=id, name=song.name, authors=authors, duration=song.duration, clip=song.clip.replace("watch?v=", "embed/"), text=get_song_text(id).split("\n"))
+    return render_template(
+        "share.html",
+        id=id,
+        name=song.name,
+        authors=authors,
+        duration=song.duration,
+        clip=song.clip.replace("watch?v=", "embed/"),
+        text=get_song_text(id).split("\n"),
+    )
+
+@app.route("/find/<text>")
+def find(text):
+    authors = []
+    songs = []
+    authors.append(db_sess.query(Author).filter(Author.name == text).first())
+    authors_2 = list(db_sess.query(Author).filter(Author.name.like(f"%{text}%")).all())
+    authors.extend(authors_2)
+    authors = authors[: min(5, len(authors))]
+    songs.append(db_sess.query(Song).filter(Song.name == text).first())
+    songs_2 = list(db_sess.query(Song).filter(Song.name.like(f"%{text}%")).all())
+    songs.extend(songs_2)
+    songs = songs[: min(5, len(songs))]
+    print(songs)
+    res = {"authors": [authors[0]], "songs": [songs[0]]}
+    for i in authors:
+        if authors[0] != i:
+            res["authors"].append(i)
+    for i in songs:
+        if songs[0] != i:
+            res["songs"].append(i)
+    songs = []
+    for i in res["songs"]:
+        if i:
+            songs.append(i)
+    res["songs"] = songs.copy()
+    authors = []
+    for i in res["authors"]:
+        if i:
+            authors.append(i)
+    res["authors"] = authors
+    for i in range(len(res["songs"])):
+        res["songs"][i] = (", ".join(
+            map(
+                lambda x: x.name,
+                db_sess.query(Author).filter(
+                    Author.id.in_(json.loads(get_song_data(res["songs"][i].id))["authors"])
+                ),
+            )
+        ), res["songs"][i])
+    return render_template("result.html", authors=res["authors"], songs=res["songs"])
+
+
+@app.route("/search/<text>")
+def search(text):
+    return redirect(f"/find/{text}")
 
 @app.route('/')
 def start():
@@ -91,12 +161,6 @@ def get_song_text(id):
 def index():
     return render_template("index.html")
 
-@app.route("/artists")
-def artists():
-    auther = db_sess.query(Author).all()
-    for user in db_sess.query(Author).all():
-        print(user.name)
-    return render_template("artists.html", auther=auther)
 
 @app.route("/charts")
 def charts_music():
@@ -166,9 +230,41 @@ def get_song_data(id):
 
 @app.route("/add-artist", methods=["POST", "GET"])
 def add_artist():
-    if request.method == "GET":
-        return render_template("add_artist.html")
+    if request.method == "POST":
+        print(request.form["name"])
+        db_sess = db_session.create_session()
+        artist = Author()
+        artist.name = request.form["name"]
+        db_sess.add(artist)
+        db_sess.commit()
+        id = (
+            db_sess.query(Author).filter(Author.name == request.form["name"]).first().id
+        )
+        file = request.files["file"]
+        f = open(
+            os.path.join(app.config["UPLOAD_FOLDER"], f"{id}.jpg"),
+            "wb+",
+        )
+        f.close()
+        file.save(os.path.join(app.config["UPLOAD_FOLDER"], f"{id}.jpg"))
+        im = Image.open(os.path.join(app.config["UPLOAD_FOLDER"], f"{id}.jpg"))
+        im2 = im.resize((300, 300))
+        im2.save(os.path.join(app.config["UPLOAD_FOLDER"], f"{id}.jpg"))
+    return render_template("add_artist.html")
 
+@app.route("/get-artists-photo/<int:id>")
+def artists_photo(id):
+    return send_from_directory(
+        app.config["UPLOAD_FOLDER"],
+        str(id) + ".jpg",
+        as_attachment=True,
+    )
+
+
+@app.route("/artists")
+def artists():
+    authors = db_sess.query(Author).all()
+    return render_template("artists.html", authors=authors)
 
 @app.route('/setting', methods=['GET', 'POST'])
 def edit_users():
