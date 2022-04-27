@@ -29,12 +29,15 @@ from PIL import Image
 
 
 app = Flask(__name__)
+login_manager = LoginManager()
+login_manager.init_app(app)
 app.config["CLIENT_SONGS"] = "./songs/"
 UPLOAD_FOLDER = "./photos/"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["SECRET_KEY"] = "yandexlyceum_secret_key"
 user_email = ''
 nic = ''
+
 
 @app.route("/share-song/<id>")
 def share_song(id):
@@ -107,6 +110,11 @@ def search(text):
 @app.route('/')
 def start():
     return render_template("start.html")
+
+@login_manager.user_loader
+def load_user(user_id):
+    db_sess = db_session.create_session()
+    return db_sess.query(User).get(user_id)
 
 @app.route('/reg', methods=['GET', 'POST'])
 def reqister():
