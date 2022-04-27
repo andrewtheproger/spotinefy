@@ -10,17 +10,23 @@ from data.register_form import RegisterForm
 from data.songs import Song
 from data.authors import Author
 from data.links import Link
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask import send_from_directory, abort
 import xmltodict
 from pprint import pprint
 import json
 import requests
+from data.login_form import LoginForm
 from flask_login import LoginManager, UserMixin,  login_required, login_user, current_user, logout_user
 
 from data.users import User
+from flask import Flask, render_template, redirect, request, abort
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 UPLOAD_FOLDER = "./static/img/"
 app = Flask(__name__)
+login_manager = LoginManager()
+login_manager.init_app(app)
 app.config["CLIENT_SONGS"] = "./songs/"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["SECRET_KEY"] = "yandexlyceum_secret_key"
@@ -56,9 +62,10 @@ def reqister():
             name=form.name.data,
             surname=form.surname.data,
             nic=form.nic.data,
-            email=form.email.data,
+            email=form.email.data
         )
         user.set_password(form.password.data)
+        print(user.set_password(form.password.data))
         db_sess.add(user)
         db_sess.commit()
         nic = form.nic.data
@@ -173,7 +180,7 @@ def add_artist():
     if request.method == "GET":
         return render_template("add_artist.html", nic=nic)
 
-
+@login_required
 @app.route('/setting', methods=['GET', 'POST'])
 def edit_users():
     global user_email
@@ -214,6 +221,39 @@ def edit_users():
                            form=form, nic=nic
                            )
 
+def check_user_authorised():
+    """Перенаправляет пользователя на страницу входа с сообщением о причине редиректа"""
+    if not current_user.is_authenticated:
+        session['message'] = 'Зарегистрируйтесь или войдите, чтобы просматривать эту страницу'
+        return redirect(url_for('login'))
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    db_sess = db_session.create_session()
+    return db_sess.query(User).get(user_id)
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    login_form = LoginForm()
+    if login_form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == login_form.email.data).first()
+        if user and user.check_password(login_form.password.data):
+            login_user(user)
+            return redirect("/music")
+        return render_template('login.html', form=login_form,
+                               message='Неверный логин или пароль')
+    try:
+        message = session['message']
+        session.pop('message', None)
+        return render_template('login.html', form=login_form,
+                               message=message)
+    except Exception:
+        return render_template('login.html', form=login_form)
+
+
+@login_required
 @app.route('/logout')
 @login_required
 def logout():
