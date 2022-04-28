@@ -22,6 +22,7 @@ import requests
 from flask_login import LoginManager, UserMixin, login_required, login_user, current_user, logout_user
 from PIL import Image
 from data.users import User
+from fuzzywuzzy import fuzz
 
 UPLOAD_FOLDER = "./photos"
 app = Flask(__name__)
@@ -281,10 +282,16 @@ def find(text):
     authors = []
     songs = []
     authors.append(db_sess.query(Author).filter(Author.name == text).first())
+    for author in db_sess.query(Author).all():
+        if fuzz.token_sort_ratio(text, author.name) >= 50:
+            authors.append(author)
     authors_2 = list(db_sess.query(Author).filter(Author.name.like(f"%{text}%")).all())
     authors.extend(authors_2)
     authors = authors[: min(4, len(authors))]
     songs.append(db_sess.query(Song).filter(Song.name == text).first())
+    for song in db_sess.query(Song).all():
+        if fuzz.token_sort_ratio(text, song.name) >= 50:
+            songs.append(song)
     songs_2 = list(db_sess.query(Song).filter(Song.name.like(f"%{text}%")).all())
     songs.extend(songs_2)
     songs = songs[: min(10, len(songs))]
