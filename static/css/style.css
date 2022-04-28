@@ -48,6 +48,10 @@ div.share {
   margin-top: auto !important;
   margin-bottom: auto !important;
 }
+.artist {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
 .red {
   background-color: #dc3545 !important;
 }
