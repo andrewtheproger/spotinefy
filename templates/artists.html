@@ -2,13 +2,11 @@
 <div>
     {% for author in authors: %}
         <h3>{{author.name}}</h3>
-        <img src=/get-artists-photo/{{author.id}} alt='' />
+        <img src="/get-artists-photo/{{author.id}}" alt='' />
     {% endfor %}
 </div>
     <script lang="Javascript">
-      var app = new Vue({el: '#app', data: {
-          req: '',
-          }})
+      var app = new Vue({el: '#app', data: {req: ""}})
     </script>
 </div>
 {% endblock %}

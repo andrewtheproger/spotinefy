@@ -19,12 +19,12 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
 
-    def repr(self):
-        return f'<Colonist> {self.id} {self.surname} {self.name}'
+    def __repr__(self):
+        return f'<User> {self.id} {self.name} {self.email}'
 
     def set_password(self, password):
-        self.hashed_password = generate_password_hash(password)
+        self.password = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.hashed_password, password)
+        return check_password_hash(self.password, password)
 

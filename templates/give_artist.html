@@ -1,0 +1,33 @@
+{% extends "base.html" %} {% block content %}
+<div class = "search">
+  <div style="display: flex">
+    <div class="artist">
+      <center>
+        <b-avatar
+          class="center"
+          src="/get-artists-photo/{{author.id}}"
+          href="/artist/{{author.id}}"
+          size="15rem"
+        ></b-avatar>
+        <h3 align="center">{{author.name}}</h3>
+      </center>
+    </div>
+  </div>
+  <b-list-group>
+    {% for song in songs: %}
+    <b-list-group-item class="d-flex align-items-center"  href="/share-song/{{song[1].id}}">
+      <span class="mr-auto">{{song[1].name}} - {{song[0]}}</song></span>
+      <b-badge variant="danger">{{song[1].duration // 60}}:{{song[1].duration % 60}}</b-badge>
+    </b-list-group-item>
+    {% endfor %}
+  </b-list-group>
+  <script lang="Javascript">
+    var app = new Vue({
+      el: '#app',
+      data: {
+        req: ""
+      },
+    })
+  </script>
+</div>
+{% endblock %}

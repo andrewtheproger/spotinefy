@@ -1,124 +1,121 @@
-{% extends "base.html" %} {% block content %}
-<div>
-  <b-form @submit="onSubmit_song" @reset="onReset">
-    <div class="b-form-group"><b-form-group
-      id="input-group-1"
-      label="Имя:"
-      label-for="input-1"
-    >
-      <b-form-input
-        id="input-1"
-        v-model="name"
-        type="text"
-        placeholder="Введите имя"
-        required
-      ></b-form-input>
-    </b-form-group>
-  </div>
+{% extends "base.html" %}
 
-    <div class="b-form-group"><b-form-group id="input-group-2" label="Фамилия:" label-for="input-2">
-      <b-form-input
-        id="input-2"
-        v-model="surname"
-        placeholder="Введите фамилию"
-        required
-      ></b-form-input>
-    </b-form-group>
-  </div>
-    <div class="b-form-group"><b-form-group id="input-group-3" label="Придумайте ник:" label-for="input-3">
-      <b-form-input
-        id="input-3"
-        v-model="nic"
-        placeholder="Введите ник"
-        required
-        type="text"
-      ></b-form-input>
-    </b-form-group>
-  </div>
-    <div class="b-form-group"><b-form-group id="input-group-4" label="Почта:" label-for="input-4">
-      <b-form-input
-        id="input-4"
-        v-model="email"
-        placeholder="Введите электронную почту"
-        required type="text"
-      ></b-form-input>
-    </b-form-group>
-  </div>
-    <div class="b-form-group"><b-form-group id="input-group-5" label="Пароль:" label-for="input-4">
-      <b-form-input
-        id="input-5"
-        v-model="password"
-        placeholder="Введите пароль"
-        required type="text"
-      ></b-form-input>
-    </b-form-group>
-  </div>
-      <div class="b-form-group"><b-form-group id="input-group-6" label="Повторите пароль:" label-for="input-4">
-      <b-form-input
-        id="input-6"
-        v-model="passwordagain"
-        placeholder="Повторно введите пароль"
-        required type="text"
-      ></b-form-input>
-    </b-form-group>
-  </div>
-    </b-form-group>
-    <b-button type="submit" variant="danger">Зарегистрироваться</b-button>
-    <b-button type="reset" variant="danger">Сброс</b-button>
-    <b-button type="submit" href="/music" variant="danger">Перейти на главную</b-button>
-    <script lang="Javascript">
-      var app = new Vue({
-        el: '#app',
-        data: {
-          name: '',
-          surname: '',
-          nic: '',
-            password: '',
-            passwordagain: '',
-          email: "",
-          file: null,
-          req: '',
+{% block content %}
+<div>
+<h1>Регистрация</h1>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control", type="name") }}<br>
+        {% for error in form.name.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.surname.label }}<br>
+        {{ form.surname(class="form-control", type="surname") }}<br>
+        {% for error in form.surname.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.nic.label }}<br>
+        {{ form.nic(class="form-control", type="nic") }}<br>
+        {% for error in form.nic.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.email.label }}<br>
+        {{ form.email(class="form-control", type="email") }}<br>
+        {% for error in form.email.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.password.label }}<br>
+        {{ form.password(class="form-control", type="password") }}<br>
+        {% for error in form.password.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.password_again.label }}<br>
+        {{ form.password_again(class="form-control", type="password") }}<br>
+        {% for error in form.password_again.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>{{ form.submit(type="submit", class="btn btn-primary red") }}</p>
+    {{message}}
+</form>
+<script lang="Javascript">
+    var app = new Vue({
+      el: '#app',
+      data: {
+        name: '',
+        surname: '',
+        nic: '',
+          password: '',
+          passwordagain: '',
+        email: "",
+        file: null,
+        req: ''
+      },
+      methods: {
+        onSubmit_song(event) {
+          event.preventDefault()
+          let formData = new FormData();
+          formData.append("file", this.file);
+          formData.append("surname", this.surname);
+          formData.append("nic", this.nic);
+          formData.append("name", this.name);
+          formData.append("password", this.password);
+          formData.append("passwordagain", this.passwordagain);
+          formData.append("email", this.email);
+          axios({
+            url: "/",
+            method: "POST",
+            headers: {
+            },
+            data: formData,
+          })
+          .then(function (response) {
+            console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
         },
-        methods: {
-          onSubmit_song(event) {
-            event.preventDefault()
-            let formData = new FormData();
-            formData.append("file", this.file);
-            formData.append("surname", this.surname);
-            formData.append("nic", this.nic);
-            formData.append("name", this.name);
-            formData.append("password", this.password);
-            formData.append("passwordagain", this.passwordagain);
-            formData.append("email", this.email);
-            axios({
-              url: "/reg",
-              method: "POST",
-              headers: {
-              },
-              data: formData,
-            })
-            .then(function (response) {
-              console.log(response);
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-          },
-          onReset(event) {
-            event.preventDefault()
-            this.surname = ''
-            this.name = ''
-            this.nic = ""
-            this.email = ""
-              this.password = ""
-              this.passwordagain = ""
-            this.show = false
-            this.$nextTick(() => {
-              this.show = true
-            })
-          }
-        },
-      })
-    </script>
+        onReset(event) {
+          event.preventDefault()
+          this.surname = ''
+          this.name = ''
+          this.nic = ""
+          this.email = ""
+            this.password = ""
+            this.passwordagain = ""
+          this.file = null
+          this.show = false
+          this.$nextTick(() => {
+            this.show = true
+          })
+        }
+      },
+    })
+  </script>
 </div>
 {% endblock %}

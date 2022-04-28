@@ -1,70 +1,38 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+
+{% block content %}
 <div>
-  <b-form @submit="onSubmit_artist" @reset="onReset">
-    <div class="b-form-group"><b-form-group
-      id="input-group-1"
-      label="Имя:"
-      label-for="input-1"
-    >
-      <b-form-input
-        id="input-1"
-        v-model="name"
-        type="text"
-        placeholder="Введите имя артиста"
-        required
-      ></b-form-input>
-    </b-form-group>
-  </div>
-  <div class="b-form-group"><b-form-group id="input-group-4" label="Загрузите фото размером 300X300:" label-for="input-5">
-  <b-form-file
-      accept="image/*"
-      id="input-5"
-      v-model="file"
-      :state="Boolean(file)"
-      placeholder="Выберите файл или переместите его сюда.."
-      drop-placeholder="Переместите файл сюда..."
-      browse-text="Выбрать"
-    ></b-form-file></b-form-group>
-  </div>
-    <b-button type="submit" variant="danger">Добавить</b-button>
-    <b-button type="reset" variant="danger">Сброс</b-button>
-    <script lang="Javascript">
-      var app = new Vue({
-        el: '#app',
-        data: {
-          name: "",
-          file: null,
-          req: '',
-        },
-        methods: {
-          onSubmit_artist(event){
-            let formData = new FormData();
-            formData.append("file", this.file);
-            formData.append("name", this.name);
-            axios({
-              url: "/add-artist",
-              method: "POST",
-              headers: {
-              },
-              data: formData,
-            })
-            .then(function (response) {
-              console.log(response);
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-          },
-          onReset(event) {
-            this.file = null
-            this.name = ''
-            this.show = false
-            this.$nextTick(() => {
-              this.show = true
-            })
-          }
-        },
-      })
-    </script>
+<h1>Добавить артиста</h1>
+<form action="" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control", type="name") }}<br>
+        {% for error in form.name.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.file.label }}<br>
+        {{ form.file(class="form-control", type="file") }}<br>
+        {% for error in form.file.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>{{ form.submit(type="submit", class="btn btn-primary red") }}</p>
+    {{message}}
+</form>
+<script lang="Javascript">
+    var app = new Vue({
+      el: '#app',
+      data: {
+        req: ''
+      },
+    })
+  </script>
 </div>
 {% endblock %}

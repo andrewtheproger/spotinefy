@@ -1,108 +1,65 @@
-{% extends "base.html" %} {% block content %}
-<div>
-  <b-form @submit="onSubmit_song" @reset="onReset">
-    <div class="b-form-group"><b-form-group
-      id="input-group-1"
-      label="Название:"
-      label-for="input-1"
-    >
-      <b-form-input
-        id="input-1"
-        v-model="name"
-        type="text"
-        placeholder="Введите название песни"
-        required
-      ></b-form-input>
-    </b-form-group>
-  </div>
+{% extends "base.html" %}
 
-    <div class="b-form-group"><b-form-group id="input-group-2" label="Авторы песни:" label-for="input-2">
-      <b-form-input
-        id="input-2"
-        v-model="authors"
-        placeholder="Введите авторов песни через запятую"
-        required
-      ></b-form-input>
-    </b-form-group>
-  </div>
-    <div class="b-form-group"><b-form-group id="input-group-3" label="Клип:" label-for="input-3">
-      <b-form-input
-        id="input-3"
-        v-model="clip"
-        placeholder="Введите ссылку на клип в YouTube"
-        required
-        type="url"
-      ></b-form-input>
-    </b-form-group>
-  </div>
-    <div class="b-form-group"><b-form-group id="input-group-4" label="Год выпуска:" label-for="input-4">
-      <b-form-input
-        id="input-4"
-        v-model="year"
-        placeholder="Введите год выпуска песни"
-        required type="number"
-      ></b-form-input>
-    </b-form-group>
-  </div>
-  <div class="b-form-group"><b-form-group id="input-group-4" label="Песня:" label-for="input-5">
-  <b-form-file
-      accept=".mp3"
-      id="input-5"
-      v-model="file"
-      :state="Boolean(file)"
-      placeholder="Выберите файл или переместите его сюда.."
-      drop-placeholder="Переместите файл сюда..."
-      browse-text="Выбрать"
-    ></b-form-file></b-form-group>
-  </div>
-    <b-button type="submit" variant="danger">Добавить</b-button>
-    <b-button type="reset" variant="danger">Сброс</b-button>
-    <script lang="Javascript">
-      var app = new Vue({
-        el: '#app',
-        data: {
-          authors: '',
-          name: '',
-          clip: '',
-          year: "",
-          file: null,
-          req: '',
-        },
-        methods: {
-          onSubmit_song(event) {
-            let formData = new FormData();
-            formData.append("file", this.file);
-            formData.append("year", this.year);
-            formData.append("clip", this.clip);
-            formData.append("name", this.name);
-            formData.append("authors", this.authors);
-            axios({
-              url: "/add-music",
-              method: "POST",
-              headers: {
-              },
-              data: formData,
-            })
-            .then(function (response) {
-              console.log(response);
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-          },
-          onReset(event) {
-            this.clip = ''
-            this.name = ''
-            this.year = ""
-            this.authors = ""
-            this.file = null
-            this.show = false
-            this.$nextTick(() => {
-              this.show = true
-            })
-          }
-        },
-      })
-    </script>
+{% block content %}
+<div>
+<h1>Добавить песню</h1>
+<form action="" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control", type="name") }}<br>
+        {% for error in form.name.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.authors.label }}<br>
+        {{ form.authors(class="form-control", type="authors") }}<br>
+        {% for error in form.authors.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.link.label }}<br>
+        {{ form.link(class="form-control", type="link") }}<br>
+        {% for error in form.link.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.year.label }}<br>
+        {{ form.year(class="form-control", type="year") }}<br>
+        {% for error in form.year.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.passwofile }}<br>
+        {{ form.file(class="form-control", type="file") }}<br>
+        {% for error in form.file.errors %}
+            <p class="danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>{{ form.submit(type="submit", class="btn btn-primary red") }}</p>
+    {{message}}
+</form>
+<script lang="Javascript">
+    var app = new Vue({
+      el: '#app',
+      data: {
+        req: ''
+      },
+    })
+  </script>
 </div>
 {% endblock %}
