@@ -282,17 +282,19 @@ def find(text):
     authors = []
     songs = []
     authors.append(db_sess.query(Author).filter(Author.name == text).first())
-    for author in db_sess.query(Author).all():
-        if fuzz.token_sort_ratio(text, author.name) >= 50:
-            authors.append(author)
     authors_2 = list(db_sess.query(Author).filter(Author.name.like(f"%{text}%")).all())
+    for author in db_sess.query(Author).all():
+        if author not in authors_2:
+            if fuzz.token_sort_ratio(text, author.name) >= 50:
+                authors_2.append(author)
     authors.extend(authors_2)
     authors = authors[: min(4, len(authors))]
     songs.append(db_sess.query(Song).filter(Song.name == text).first())
-    for song in db_sess.query(Song).all():
-        if fuzz.token_sort_ratio(text, song.name) >= 50:
-            songs.append(song)
     songs_2 = list(db_sess.query(Song).filter(Song.name.like(f"%{text}%")).all())
+    for song in db_sess.query(Song).all():
+        if song not in songs_2:
+            if fuzz.token_sort_ratio(text, song.name) >= 50:
+                songs_2.append(song)
     songs.extend(songs_2)
     songs = songs[: min(10, len(songs))]
     print(songs)
