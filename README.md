@@ -19,10 +19,18 @@
 
 Рабочая ссылка: *https://spotinefy.herokuapp.com/*
 
+бот в дискорде: https://github.com/Gek4/discord_music
+
 /get-artists-photo/<int:id> - возвращает фото артиста по айди
+
 /get-song-text/<id> - текст песни по айди
+  
 /get-song-file/<id> - mp3 файл песни по айди
+  
 /get-song-data/<id> - данные о песни по айди
+  
 photos - фото артистов, название=айди артиста
+  
 songs - файлы песен, название=название песни
+  
 scripts - тестовые скрипты
